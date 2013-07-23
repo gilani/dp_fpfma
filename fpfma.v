@@ -56,14 +56,10 @@ module fpfma(A, B, C, rnd, clk, rst, result);
   //****************************************************************************************************
   //************************Significand multiplier
   
-  wire [2*(SIG_WIDTH+1)+1:0] sum,carry; //50-bit 
-   localparam m = SIG_WIDTH+1;
-   wire [2*(SIG_WIDTH+1)+1:0] Sbig, Cbig;//50-bit
-   wire [2*(SIG_WIDTH+1)-1:0] MiS;
-   wire [2*(SIG_WIDTH+1)-1:0] MiC;
-   wire [2*(SIG_WIDTH+1)+2:0] dw_prod = Sbig + Cbig;
-   assign MiS=Sbig[2*(SIG_WIDTH+1)-1:0];
-   assign MiC=Cbig[2*(SIG_WIDTH+1)-1:0];
+  wire [2*(SIG_WIDTH+1)+1:0] sum,carry; //108-bit 
+   wire [2*(SIG_WIDTH+1)+1:0] Sbig, Cbig;//108-bit
+
+
    DW02_multp #((SIG_WIDTH+1), (SIG_WIDTH+1), 2*(SIG_WIDTH+1)+2) multp_dw( .a(aSig),   .b(bSig), .tc(1'b0), .out0(Sbig), .out1(Cbig) ); 
    
    //Assign 50-bit sum and carry vectors for significand multiplier
@@ -83,12 +79,7 @@ module fpfma(A, B, C, rnd, clk, rst, result);
   wire [SIG_WIDTH+3:0] C_hi = CAligned[3*(SIG_WIDTH+1)+6:2*(SIG_WIDTH+1)+4];//[78:52] --27-bit , MSB is sign bit
   
   
-  
-  wire [2*(SIG_WIDTH+1)+3:0] carry_wgt = {carry[2*SIG_WIDTH+3],carry,1'b0};//51-bit
-  
-  wire [2*(SIG_WIDTH+1)+1:0] sum_add, carry_add;//CSA outputs -- 50-bit
-  
-  wire [2*(SIG_WIDTH+1)+3:0] sum_se =(carry_wgt[2*(SIG_WIDTH+1)+2])?{{2{sum[2*(SIG_WIDTH+1)+1]}},sum }:{{2{sum[2*(SIG_WIDTH+1)+1]}},sum };//Concatenate MSB of sum (50-bit)
+  wire [2*(SIG_WIDTH+1)+1:0] sum_add, carry_add;//CSA outputs -- 108-bit
   
   compressor_3_2_group #(.GRP_WIDTH(2*(SIG_WIDTH+1)+2)) ADD(sum, carry, C_mid, sum_add, carry_add); /* 50-bit*/
   
@@ -115,11 +106,11 @@ module fpfma(A, B, C, rnd, clk, rst, result);
   
   wire [2*(SIG_WIDTH+1)+1-1:0] sum_small = {sum_add[2*(SIG_WIDTH+1)+1-1:0]};//49-bit
   wire [2*(SIG_WIDTH+1)+1-1:0] carry_small = {carry_add[2*(SIG_WIDTH+1)+1-2:0],1'b0};
-  wire [2*(SIG_WIDTH+1)+5:0] test_sum_eac = sum_add + carry_add_wgt;
+
   
   //*****************************************************************************************************
   //********************* Leading zero anticipator
-  wire [5:0] lza_shamt;
+  wire [6:0] lza_shamt;
   lza LZA(sum_add, carry_add_wgt, lza_shamt);//50-bit
   
 

@@ -1,7 +1,7 @@
 module normalizeAndExpUpdate(prenormalized, lza_shamt, cExpIsSmall, shamt, exp_correction, normalized, res_exp, normalized_exp);
   `include "parameters.v"
   input [3*(SIG_WIDTH+1)+7:0] prenormalized;//80-bit
-  input [5:0] lza_shamt, shamt;
+  input [6:0] lza_shamt, shamt;
   input cExpIsSmall;
   input [EXP_WIDTH-1:0] res_exp;
   output [EXP_WIDTH-1:0] normalized_exp;
